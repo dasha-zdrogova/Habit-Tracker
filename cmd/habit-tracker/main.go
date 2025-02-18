@@ -62,11 +62,10 @@ func main() {
 	// 	logger.Error("failed to mark habit", sl.Err(err))
 	// 	os.Exit(1)
 	// }
-	notes, err := storage.GetHabit(&models.Habit{
-		ID:          1,
-		UserID:      0,
-		Name:        "",
-		Description: "",
+	notes, err := storage.GetUserHabits(&models.User{
+		ID:           2,
+		Username:     "d",
+		PasswordHash: "",
 	})
 	if err != nil {
 		logger.Error("failed get notes", sl.Err(err))

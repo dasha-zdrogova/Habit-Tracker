@@ -77,6 +77,27 @@ func (s *Storage) CreateUser(user *models.User) error {
 	return nil
 }
 
+func (s *Storage) GetUserHabits(user *models.User) ([]*models.Habit, error) {
+	const op = "storage.sqlite.GetUserHabits"
+	getHabits := `SELECT * FROM habits WHERE user_id = $1`
+
+	notes, err := s.db.Query(getHabits, user.ID)
+	if err != nil {
+		return nil, fmt.Errorf("%s, %w", op, err)
+	}
+	defer notes.Close()
+
+	habits, err := s.scanHabits(notes)
+	if err != nil {
+		return nil, fmt.Errorf("%s, %w", op, err)
+	}
+
+	if len(habits) == 0 {
+		return nil, storage.ErrHabitsNotFound
+	}
+	return habits, nil
+}
+
 func (s *Storage) CreateHabit(habit *models.Habit) error {
 	const op = "storage.sqlite.CreateHabit"
 	createHabit := `INSERT INTO habits (user_id, name, description) VALUES ($1, $2, $3)`
@@ -98,26 +119,42 @@ func (s *Storage) MarkHabit(habitLogs *models.HabitLogs) error {
 	_, err := s.db.Exec(markHabit, habitLogs.HabitID, habitLogs.CompletedDate)
 	if err != nil {
 		if sqliteErr, ok := err.(sqlite3.Error); ok && sqliteErr.ExtendedCode == sqlite3.ErrConstraintUnique {
-			return fmt.Errorf("%s, %w", op, storage.ErrHabitAlreadyMarked)
+			return fmt.Errorf("%s, %w", op, storage.ErrHabitMarked)
 		}
 		return fmt.Errorf("%s, %w", op, err)
 	}
 	return nil
 }
 
-func (s *Storage) GetHabit(habit *models.Habit) ([]*models.HabitLogs, error) {
-	const op = "storage.sqlite.GetHabit"
+func (s *Storage) GetHabitInfo(habit *models.Habit) ([]*models.HabitLogs, error) {
+	const op = "storage.sqlite.GetHabitInfo"
 	getHabit := `SELECT * FROM habit_logs WHERE habit_id = $1`
 
 	notes, err := s.db.Query(getHabit, habit.ID)
 	if err != nil {
 		return nil, fmt.Errorf("%s, %w", op, err)
 	}
-	return s.scanHabit(notes)
+	defer notes.Close()
+
+	habits, err := s.scanHabit(notes)
+	if err != nil {
+		return nil, fmt.Errorf("%s, %w", op, err)
+	}
+
+	if len(habits) == 0 {
+		return nil, storage.ErrHabitNotFound
+	}
+	return habits, nil
 }
 
 func (s *Storage) DeleteHabit(habit *models.Habit) error {
-	// TODO: дописать
+	const op = "storage.sqlite.DeleteHabit"
+	deleteHabit := `DELETE FROM habit WHERE id = $1`
+
+	_, err := s.db.Exec(deleteHabit, habit.ID)
+	if err != nil {
+		return fmt.Errorf("%s, %w", op, err)
+	}
 	return nil
 }
 
@@ -128,6 +165,28 @@ func (s *Storage) scanHabit(rows *sql.Rows) ([]*models.HabitLogs, error) {
 	for rows.Next() {
 		var note models.HabitLogs
 		err := rows.Scan(&note.ID, &note.HabitID, &note.CompletedDate)
+
+		if err != nil {
+			return nil, fmt.Errorf("%s, %w", op, err)
+		}
+		notes = append(notes, &note)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("%s, %w", op, err)
+	}
+
+	return notes, nil
+}
+
+// TODO: попробовать переписать на дженерики
+func (s *Storage) scanHabits(rows *sql.Rows) ([]*models.Habit, error) {
+	const op = "storage.sqlite.scanHabits"
+
+	var notes []*models.Habit
+	for rows.Next() {
+		var note models.Habit
+		err := rows.Scan(&note.ID, &note.UserID, &note.Name, &note.Description)
 
 		if err != nil {
 			return nil, fmt.Errorf("%s, %w", op, err)
