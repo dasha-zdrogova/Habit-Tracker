@@ -1,6 +1,9 @@
-package storage
+package repository
 
-import "errors"
+import (
+	"errors"
+	"habit-tracker/internal/models"
+)
 
 var (
 	ErrUserNotFound   = errors.New("user not found")
@@ -10,3 +13,7 @@ var (
 	ErrHabitExists    = errors.New("habit already exists")
 	ErrHabitMarked    = errors.New("habit already marked")
 )
+
+type UserRepository interface {
+	Create(user *models.User) error
+}
