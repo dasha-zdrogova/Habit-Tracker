@@ -3,6 +3,7 @@ package repository
 import (
 	"errors"
 	"habit-tracker/internal/models"
+	"time"
 )
 
 var (
@@ -15,5 +16,14 @@ var (
 )
 
 type UserRepository interface {
-	Create(user *models.User) error
+	Create(username string, password string) error
+	Login(username string, password string) (int, error)
+	GetHabits(userID int) ([]*models.Habit, error)
+}
+
+type HabitRepository interface {
+	Create(userID int, name string, description string) error
+	Mark(habitID int, completedDate time.Time) error
+	GetInfo(habitID int) ([]*models.HabitLogs, error)
+	Delete(habitID int) error
 }

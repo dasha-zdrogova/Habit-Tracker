@@ -15,10 +15,11 @@ type Habit struct {
 	Description string `json:"description"`
 }
 
+//TODO: переписать в базе complete_at
 type HabitLogs struct {
 	ID int `json:"id"`
 	HabitID int `json:"habit_id"`
-	CompletedDate time.Time `json:"completed_date"`
+	CompletedAt time.Time `json:"completed_date"`
 }
 
 type Response struct {

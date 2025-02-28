@@ -10,15 +10,15 @@ import (
 	"github.com/mattn/go-sqlite3"
 )
 
-type HabitRepository struct {
+type SqliteHabitRepository struct {
 	db *sql.DB
 }
 
-func NewHabitRepository(db *sql.DB) *HabitRepository {
-	return &HabitRepository{db: db}
+func NewSqliteHabitRepository(db *sql.DB) *SqliteHabitRepository {
+	return &SqliteHabitRepository{db: db}
 }
 
-func (r *HabitRepository) Create(userID int, name string, description string) error {
+func (r *SqliteHabitRepository) Create(userID int, name string, description string) error {
 	const op = "storage.sqlite.CreateHabit"
 	createHabit := `INSERT INTO habits (user_id, name, description) VALUES ($1, $2, $3)`
 
@@ -32,7 +32,7 @@ func (r *HabitRepository) Create(userID int, name string, description string) er
 	return nil
 }
 
-func (r *HabitRepository) Mark(habitID int, completedDate time.Time) error {
+func (r *SqliteHabitRepository) Mark(habitID int, completedDate time.Time) error {
 	const op = "storage.sqlite.MarkHabit"
 	markHabit := `INSERT INTO habit_logs (habit_id, completed_date) VALUES ($1, $2)`
 
@@ -46,7 +46,7 @@ func (r *HabitRepository) Mark(habitID int, completedDate time.Time) error {
 	return nil
 }
 
-func (r *HabitRepository) GetInfo(habitID int) ([]*models.HabitLogs, error) {
+func (r *SqliteHabitRepository) GetInfo(habitID int) ([]*models.HabitLogs, error) {
 	const op = "storage.sqlite.GetHabitInfo"
 	getHabit := `SELECT * FROM habit_logs WHERE habit_id = $1`
 
@@ -67,7 +67,7 @@ func (r *HabitRepository) GetInfo(habitID int) ([]*models.HabitLogs, error) {
 	return habits, nil
 }
 
-func (r *HabitRepository) Delete(habitID int) error {
+func (r *SqliteHabitRepository) Delete(habitID int) error {
 	const op = "storage.sqlite.DeleteHabit"
 	deleteHabit := `DELETE FROM habit WHERE id = $1`
 
@@ -78,13 +78,13 @@ func (r *HabitRepository) Delete(habitID int) error {
 	return nil
 }
 
-func (r *HabitRepository) scanHabit(rows *sql.Rows) ([]*models.HabitLogs, error) {
+func (r *SqliteHabitRepository) scanHabit(rows *sql.Rows) ([]*models.HabitLogs, error) {
 	const op = "storage.sqlite.scanHabit"
 
 	var notes []*models.HabitLogs
 	for rows.Next() {
 		var note models.HabitLogs
-		err := rows.Scan(&note.ID, &note.HabitID, &note.CompletedDate)
+		err := rows.Scan(&note.ID, &note.HabitID, &note.CompletedAt)
 
 		if err != nil {
 			return nil, fmt.Errorf("%s, %w", op, err)

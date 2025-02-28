@@ -9,15 +9,15 @@ import (
 	"github.com/mattn/go-sqlite3"
 )
 
-type UserRepository struct {
+type SqliteUserRepository struct {
 	db *sql.DB
 }
 
-func NewUserRepository(db *sql.DB) *UserRepository {
-	return &UserRepository{db: db}
+func NewSqliteUserRepository(db *sql.DB) *SqliteUserRepository {
+	return &SqliteUserRepository{db: db}
 }
 
-func (r *UserRepository) Create(username string, password string) error {
+func (r *SqliteUserRepository) Create(username string, password string) error {
 	const op = "repository.sqlite.user.CreateUser"
 	createUser := `INSERT INTO users (username, password_hash) VALUES ($1, $2)`
 
@@ -31,7 +31,7 @@ func (r *UserRepository) Create(username string, password string) error {
 	return nil
 }
 
-func (r *UserRepository) ValidatePassword(username string, password string) (int, error) {
+func (r *SqliteUserRepository) Login(username string, password string) (int, error) {
 	const op = "repository.sqlite.user. ValidatePassword"
 	//TODO: password_hash -> password
 	//TODO: придумать что-то с хэшированием пароля
@@ -49,7 +49,7 @@ func (r *UserRepository) ValidatePassword(username string, password string) (int
 	return userID, nil
 }
 
-func (r *UserRepository) GetHabits(userID int) ([]*models.Habit, error) {
+func (r *SqliteUserRepository) GetHabits(userID int) ([]*models.Habit, error) {
 	const op = "repository.sqlite.GetUserHabits"
 	getHabits := `SELECT * FROM habits WHERE user_id = $1`
 
@@ -85,7 +85,7 @@ func (r *UserRepository) GetHabits(userID int) ([]*models.Habit, error) {
 // 	return userID, nil
 // }
 
-func (r *UserRepository) scanHabits(rows *sql.Rows) ([]*models.Habit, error) {
+func (r *SqliteUserRepository) scanHabits(rows *sql.Rows) ([]*models.Habit, error) {
 	const op = "repository.sqlite.scanHabits"
 
 	var notes []*models.Habit

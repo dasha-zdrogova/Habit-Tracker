@@ -38,9 +38,11 @@ func main() {
 	}
 	_ = storage
 
-	repos := sqlite.NewRepositories(storage.DB)
 
-	service := service.NewServices(repos)
+	userRepo :=  sqlite.NewSqliteUserRepository(storage.DB)
+	habitRepo := sqlite.NewSqliteHabitRepository(storage.DB)
+
+	service := service.NewServices(userRepo, habitRepo)
 
 	// регистрация
 	err = service.Users.Register("dasha", "d")
@@ -50,7 +52,7 @@ func main() {
 	}
 
 	// авторизация
-	userID, err := service.Users.Validate("dasha", "d")
+	userID, err := service.Users.Login("dasha", "d")
 	if err != nil {
 		logger.Error("failed to login", sl.Err(err))
 	}

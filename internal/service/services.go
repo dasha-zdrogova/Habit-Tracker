@@ -1,15 +1,17 @@
 package service
 
-import "habit-tracker/internal/repository/sqlite"
+import (
+	"habit-tracker/internal/repository"
+)
 
 type Services struct {
-	Users UserService
+	Users  UserService
 	Habits HabitService
 }
 
-func NewServices(repos *sqlite.Repositories) *Services {
+func NewServices(usersRepo repository.UserRepository, habitsRepo repository.HabitRepository) *Services {
 	return &Services{
-		Users:  NewUserService(repos.Users),
-		Habits: NewHabitService(repos.Habits),
+		Users:  NewUserService(usersRepo),
+		Habits: NewHabitService(habitsRepo),
 	}
 }

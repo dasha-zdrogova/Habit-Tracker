@@ -2,7 +2,7 @@ package service
 
 import (
 	"habit-tracker/internal/models"
-	"habit-tracker/internal/repository/sqlite"
+	"habit-tracker/internal/repository"
 	"time"
 )
 
@@ -14,10 +14,10 @@ type HabitService interface {
 }
 
 type HabitServiceImpl struct {
-	repo *sqlite.HabitRepository
+	repo repository.HabitRepository
 }
 
-func NewHabitService(repo *sqlite.HabitRepository) HabitService {
+func NewHabitService(repo repository.HabitRepository) HabitService {
 	return &HabitServiceImpl{repo: repo}
 }
 

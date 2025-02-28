@@ -7,11 +7,11 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-type Storage struct {
+type SqliteStorage struct {
 	DB *sql.DB
 }
 
-func New(storagePath string) (*Storage, error) {
+func New(storagePath string) (*SqliteStorage, error) {
 	const op = "storage.sqlite.New"
 
 	db, err := sql.Open("sqlite3", storagePath)
@@ -56,5 +56,5 @@ func New(storagePath string) (*Storage, error) {
 		return nil, fmt.Errorf("%s, %w", op, err)
 	}
 
-	return &Storage{DB: db}, nil
+	return &SqliteStorage{DB: db}, nil
 }
