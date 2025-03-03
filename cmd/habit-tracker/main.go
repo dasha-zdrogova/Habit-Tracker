@@ -1,18 +1,16 @@
 package main
 
 import (
-	"fmt"
 	"habit-tracker/internal/config"
+	"habit-tracker/internal/handler"
 	sl "habit-tracker/internal/lib/logger"
 	"habit-tracker/internal/repository/sqlite"
 	"habit-tracker/internal/service"
 	"log/slog"
+	"net/http"
 	"os"
 
-	// "github.com/go-chi/chi/v5"
-	// "github.com/go-chi/chi/v5/middleware"
-	// "github.com/prometheus/common/route"
-	"time"
+	"github.com/go-chi/chi/v5"
 )
 
 const (
@@ -38,50 +36,54 @@ func main() {
 	}
 	_ = storage
 
-
-	userRepo :=  sqlite.NewSqliteUserRepository(storage.DB)
+	userRepo := sqlite.NewSqliteUserRepository(storage.DB)
 	habitRepo := sqlite.NewSqliteHabitRepository(storage.DB)
 
 	service := service.NewServices(userRepo, habitRepo)
-
 	// регистрация
-	err = service.Users.Register("dasha", "d")
-	if err != nil {
-		logger.Error("failed to create user", sl.Err(err))
-		os.Exit(1)
-	}
+	// err = service.Users.Register("dasha", "d")
+	// if err != nil {
+	// 	logger.Error("failed to create user", sl.Err(err))
+	// 	os.Exit(1)
+	// }
 
-	// авторизация
-	userID, err := service.Users.Login("dasha", "d")
-	if err != nil {
-		logger.Error("failed to login", sl.Err(err))
-	}
+	// // авторизация
+	// userID, err := service.Users.Login("dasha", "d")
+	// if err != nil {
+	// 	logger.Error("failed to login", sl.Err(err))
+	// }
 
-	// создание привычки
-	err = service.Habits.Create(userID, "dance", "")
-	if err != nil {
-		logger.Error("failed to create habit", sl.Err(err))
-		os.Exit(1)
-	}
+	// // создание привычки
+	// err = service.Habits.Create(userID, "dance", "")
+	// if err != nil {
+	// 	logger.Error("failed to create habit", sl.Err(err))
+	// 	os.Exit(1)
+	// }
 
-	// отметка привычки
-	err = service.Habits.Mark(1, time.Now().UTC().Truncate(24*time.Hour))
-	if err != nil {
-		logger.Error("failed to mark habit", sl.Err(err))
-		os.Exit(1)
-	}
+	// // отметка привычки
+	// err = service.Habits.Mark(1, time.Now().UTC().Truncate(24*time.Hour))
+	// if err != nil {
+	// 	logger.Error("failed to mark habit", sl.Err(err))
+	// 	os.Exit(1)
+	// }
 
-	// получение всех привычек
-	notes, err := service.Users.GetHabits(userID)
-	if err != nil {
-		logger.Error("failed get notes", sl.Err(err))
-		os.Exit(1)
-	}
-	for _, note := range notes {
-		fmt.Println(note)
-	}
+	// // получение всех привычек
+	// notes, err := service.Users.GetHabits(userID)
+	// if err != nil {
+	// 	logger.Error("failed get notes", sl.Err(err))
+	// 	os.Exit(1)
+	// }
+	// for _, note := range notes {
+	// 	fmt.Println(note)
+	// }
 
-	// router := chi.NewRouter()
+	handlers := handler.NewHandler(service)
+	router := chi.NewRouter()
+	handlers.Register(router)
+
+	if err := http.ListenAndServe(config.Address, router); err != nil {
+		logger.Error("server stoped", sl.Err(err))
+	}
 	// router.Use(middleware.RequestID)
 	// //TODO: сделать middleware на логирование + добавить локальное логирование
 	// router.Use(middleware.Recoverer)
