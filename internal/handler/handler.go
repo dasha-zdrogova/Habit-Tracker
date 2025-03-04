@@ -34,12 +34,13 @@ func (h *Handler) Register(router chi.Router) {
 	router.Route("/api", func(r chi.Router) {
 		r.Use(h.authMiddleware)
 
-	// 	r.Route("/habit", func(r chi.Router) {
-	// 		r.Post("/create", h.createHabit)
-	// 		r.Get("/info/{id}", h.getHabitInfo)
-	// 		r.Put("/mark/{id}", h.markHabit)
-	// 		r.Delete("delete/{id}", h.deleteHabit)
-	// 	})
+		r.Route("/habit", func(r chi.Router) {
+			r.Post("/create", h.createHabit)
+			r.Get("/info/{id}", h.getHabitInfo)
+			r.Put("/mark/{id}", h.markHabit)
+			r.Delete("/delete/{id}", h.deleteHabit)
+			// r.Get("/all", h.getHabits)
+		})
 	})
 
 }

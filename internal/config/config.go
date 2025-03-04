@@ -10,21 +10,21 @@ import (
 )
 
 type Config struct {
-	Env string `yaml:"env" env-default:"local"`
+	Env         string `yaml:"env" env-default:"local"`
 	StoragePath string `yaml:"storage_path" env-required:"true"`
-	HTTPServer `yaml:"http_server"`
+	HTTPServer  `yaml:"http_server"`
 }
 
 type HTTPServer struct {
-	Address string `yaml:"address" env-default:"localhost:8082"`
-	Timeout time.Duration `yaml:"timeout" env-default:"4s"`
+	Address     string        `yaml:"address" env-default:"localhost:8082"`
+	Timeout     time.Duration `yaml:"timeout" env-default:"4s"`
 	IdleTimeout time.Duration `yaml:"idle_timeout" env-default:"60s"`
 }
 
 func MustLoad() *Config {
 	err := godotenv.Load(".env")
 	if err != nil {
-		log.Fatal("Error loading .env file")
+		log.Fatal("Error loading .env file", err)
 	}
 	configPath := os.Getenv("CONFIG_PATH")
 	if configPath == "" {
