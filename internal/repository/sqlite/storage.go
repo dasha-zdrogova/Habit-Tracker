@@ -19,6 +19,11 @@ func New(storagePath string) (*SqliteStorage, error) {
 		return nil, fmt.Errorf("%s, %w", op, err)
 	}
 
+	_, err = db.Exec("PRAGMA foreign_keys = ON")
+	if err != nil {
+		return nil, err
+	}
+
 	createUsers := `
 		CREATE TABLE IF NOT EXISTS users (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -36,7 +41,7 @@ func New(storagePath string) (*SqliteStorage, error) {
 
 	createHabitLogs := `CREATE TABLE IF NOT EXISTS habit_logs (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
-		habit_id INTEGER REFERENCES habits(habit_id) ON DELETE CASCADE,
+		habit_id INTEGER REFERENCES habits(id) ON DELETE CASCADE,
 		completed_date DATE,
 		UNIQUE (habit_id, completed_date)
 	)`

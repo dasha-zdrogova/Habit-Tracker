@@ -11,6 +11,7 @@ type HabitService interface {
 	Mark(habitID int, completedDate time.Time) error
 	GetInfo(habitId int) ([]*models.HabitLogs, error)
 	Delete(habitID int) error
+	BelongsToUser(habitID int, userID int) error
 }
 
 type HabitServiceImpl struct {
@@ -35,4 +36,8 @@ func (s *HabitServiceImpl) GetInfo(habitId int) ([]*models.HabitLogs, error) {
 
 func (s *HabitServiceImpl) Delete(habitId int) error {
 	return s.repo.Delete(habitId)
+}
+
+func (s *HabitServiceImpl) BelongsToUser(habitID int, userID int) error {
+	return s.repo.BelongsToUser(habitID, userID)
 }

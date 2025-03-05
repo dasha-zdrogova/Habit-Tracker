@@ -70,11 +70,27 @@ func (r *SqliteHabitRepository) GetInfo(habitID int) ([]*models.HabitLogs, error
 
 func (r *SqliteHabitRepository) Delete(habitID int) error {
 	const op = "storage.sqlite.DeleteHabit"
-	deleteHabit := `DELETE FROM habit WHERE id = $1`
+	deleteHabit := `DELETE FROM habits WHERE id = $1`
 
 	_, err := r.db.Exec(deleteHabit, habitID)
 	if err != nil {
 		return fmt.Errorf("%s, %w", op, err)
+	}
+	return nil
+}
+
+func (r *SqliteHabitRepository) BelongsToUser(habitID int, userID int) error {
+	const op = "storage.sqlite.BelongsToUser"
+	isBelong := `SELECT COUNT(*) FROM habits WHERE id = $1 AND user_id = $2`
+
+	var count int
+	err := r.db.QueryRow(isBelong, habitID, userID).Scan(&count)
+	if err != nil {
+		return fmt.Errorf("%s, %w", op, err)
+	}
+
+	if count == 0 {
+		return fmt.Errorf("%s, %w", op, repository.ErrHabitNotBelongToUser)
 	}
 	return nil
 }

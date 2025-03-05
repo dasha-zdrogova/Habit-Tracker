@@ -16,6 +16,34 @@ type createHabitRequest struct {
 	Description string `json:"description"`
 }
 
+func (h *Handler) WithHabitAccess(next http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		habitID, err := strconv.Atoi(chi.URLParam(r, "id"))
+		if err != nil {
+			http.Error(w, "invalid ID format", http.StatusBadRequest)
+			return
+		}
+
+		userID, err := h.getUserIDFromContext(r)
+		if err != nil {
+			http.Error(w, "user not found", http.StatusNotFound)
+			return
+		}
+
+		err = h.services.Habits.BelongsToUser(habitID, userID)
+		if err != nil {
+			if errors.Is(err, repository.ErrHabitNotBelongToUser) {
+				http.Error(w, "habit does not belong to user", http.StatusForbidden)
+				return
+			}
+			http.Error(w, "server error", http.StatusInternalServerError)
+			return
+		}
+
+		next(w, r)
+	}
+}
+
 func (h *Handler) createHabit(w http.ResponseWriter, r *http.Request) {
 	userID, err := h.getUserIDFromContext(r)
 	if err != nil {
@@ -61,6 +89,7 @@ func (h *Handler) getHabitInfo(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "invalid ID format", http.StatusBadRequest)
 		return
 	}
+
 	habitLogs, err := h.services.Habits.GetInfo(ID)
 	if err != nil {
 		if errors.Is(err, repository.ErrHabitNotFound) {
@@ -81,6 +110,7 @@ func (h *Handler) markHabit(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "invalid ID format", http.StatusBadRequest)
 		return
 	}
+
 	err = h.services.Habits.Mark(ID, time.Now().UTC().Truncate(24*time.Hour))
 	if err != nil {
 		if errors.Is(err, repository.ErrHabitMarked) {

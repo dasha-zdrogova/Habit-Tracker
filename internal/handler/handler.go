@@ -36,9 +36,11 @@ func (h *Handler) Register(router chi.Router) {
 
 		r.Route("/habit", func(r chi.Router) {
 			r.Post("/create", h.createHabit)
-			r.Get("/info/{id}", h.getHabitInfo)
-			r.Put("/mark/{id}", h.markHabit)
-			r.Delete("/delete/{id}", h.deleteHabit)
+
+			r.Get("/info/{id}", h.WithHabitAccess(h.getHabitInfo))
+			r.Put("/mark/{id}", h.WithHabitAccess(h.markHabit))
+			r.Delete("/delete/{id}", h.WithHabitAccess(h.deleteHabit))
+
 			// r.Get("/all", h.getHabits)
 		})
 	})
