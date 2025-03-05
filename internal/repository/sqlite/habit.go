@@ -32,6 +32,7 @@ func (r *SqliteHabitRepository) Create(userID int, name string, description stri
 	return nil
 }
 
+// TODO: добавить обработку ошибки, когда не существует привычки с нужным ID
 func (r *SqliteHabitRepository) Mark(habitID int, completedDate time.Time) error {
 	const op = "storage.sqlite.MarkHabit"
 	markHabit := `INSERT INTO habit_logs (habit_id, completed_date) VALUES ($1, $2)`
