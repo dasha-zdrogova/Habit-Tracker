@@ -3,6 +3,7 @@ package handler
 import (
 	"encoding/json"
 	"errors"
+	"habit-tracker/internal/models"
 	"habit-tracker/internal/repository"
 	"net/http"
 	"strconv"
@@ -93,7 +94,8 @@ func (h *Handler) getHabitInfo(w http.ResponseWriter, r *http.Request) {
 	habitLogs, err := h.services.Habits.GetInfo(ID)
 	if err != nil {
 		if errors.Is(err, repository.ErrHabitNotFound) {
-			http.Error(w, "habit not found", http.StatusNotFound)
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode([]*models.HabitLogs{})
 			return
 		}
 		http.Error(w, "server error", http.StatusInternalServerError)

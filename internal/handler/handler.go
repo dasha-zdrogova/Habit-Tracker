@@ -41,7 +41,7 @@ func (h *Handler) Register(router chi.Router) {
 			r.Put("/mark/{id}", h.WithHabitAccess(h.markHabit))
 			r.Delete("/delete/{id}", h.WithHabitAccess(h.deleteHabit))
 
-			// r.Get("/all", h.getHabits)
+			r.Get("/all", h.getHabits)
 		})
 	})
 
