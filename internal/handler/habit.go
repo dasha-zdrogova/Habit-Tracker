@@ -81,7 +81,7 @@ func (h *Handler) markHabit(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "invalid ID format", http.StatusBadRequest)
 		return
 	}
-	err = h.services.Habits.Mark(ID, time.Now())
+	err = h.services.Habits.Mark(ID, time.Now().UTC().Truncate(24*time.Hour))
 	if err != nil {
 		if errors.Is(err, repository.ErrHabitMarked) {
 			http.Error(w, "habit already marked", http.StatusConflict)
